@@ -22,19 +22,21 @@ func main() {
 	s := &http.Server{
 		Addr:         ":9090",
 		Handler:      sm,
+		ErrorLog:	  l,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  120 * time.Second,
-		ReadTimeout:  1 * time.Second,
-		WriteTimeout: 1 * time.Second,
 	}
 
 	go func() {
 		err := s.ListenAndServe()
 		if err != nil {
 			l.Fatal(err)
+			os.Exit(1)
 		}
 	}()
 
-	sigChan := make(chan os.Signal)
+	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
 	signal.Notify(sigChan, os.Kill)
 
